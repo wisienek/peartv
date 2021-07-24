@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>PearTV</title>
+
+    <link rel="stylesheet" href="./includes/css/bootstrap.min.css">
+    <link rel="stylesheet" href="./includes/css/main.css">
+    <script src="./includes/js/jquery.js" ></script>
+    <script src="./includes/js/bootstrap.bundle.min.js"></script>
+    <style>
+        body{
+            background-image: url("./includes/img/pear.jpg");
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-position: center;
+        }
+    </style>
+</head>
+<body>
+
+
+    <nav class="navbar sticky-top navbar-expand-lg navbar-dark bg-dark" >
+        <div class="container-fluid">
+          <a class="navbar-brand" href="#">PearTV</a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+              <li class="nav-item">
+                <a class="nav-link" href="profile.php" id="home">Profile</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="movies.php" id="movies">Movies</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="list.php" id="myList">My list</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+
+
+      <div class="content" style="padding-top: 3vh; padding-bottom: 3vh;">
+        <h1 style="color: white">My list</h1>
+        <div class="myList">
+
+          
+        </div>
+      </div>
+
+
+    <script>
+        $.get(`http://localhost/peartv/server/rented.php` , res => {
+          try{
+            let x = JSON.parse(res);
+
+            x.forEach(rented=>{
+              let id = rented.movie_id;
+              if(!id) { throw "Brak id!" }
+              const movieInfo = `https://api.themoviedb.org/3/movie/${id}?api_key=YOURAPIKEY`;
+
+              $.get(movieInfo, data=>{
+                if(!data.title){ throw "Brak tytułu"; }
+                $(`<div class="listMovie">
+                    <img src="https://www.themoviedb.org/t/p/w1280_and_h720_multi_faces${data.backdrop_path}" alt="poster">
+
+                    <div class="listMovieHidden" id="${id}">
+                      <h4>${data.title}</h4>
+                      <div class="listMovieInfo">
+                        <div>
+                          <div class="liked noTuch">${data.vote_average * 10}% liked this movie</div>
+                          <span class="badge ${data.adult==true? "bg-success": "bg-danger"} pg">PG ${data.adult==true? "18": "13"}</span>
+                          <span class="length">${parseInt(data.runtime/60)}h ${parseInt(data.runtime%60)}m</span>
+                        </div>
+                        <span class="genres">${data.genres.map(g=> g.name).join(", ")}</span>
+                      </div>
+                    </div>
+                  </div>`)
+                .appendTo(".myList");
+              });
+
+
+            });
+
+          } 
+          catch(er){
+            console.error(er);
+          }
+        });
+
+
+    </script>
+
+    
+</body>
+</html>
